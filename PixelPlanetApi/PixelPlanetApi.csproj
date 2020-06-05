@@ -8,12 +8,14 @@
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Authors>LittleCrabby</Authors>
     <Company />
-    <Description>A simple library to create your own bot for pixelplanet.fun</Description>
+    <Description>A simple library to interact with pixelplanet.fun API</Description>
     <PackageProjectUrl>https://github.com/LittleCrabby/PixelPlanetApi</PackageProjectUrl>
     <RepositoryUrl>https://github.com/LittleCrabby/PixelPlanetApi</RepositoryUrl>
     <PackageTags>api-wrapper bot pixel-art</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Copyright>2020 LittleCrabby</Copyright>
+    <AssemblyVersion>1.0.1</AssemblyVersion>
+    <FileVersion>1.0.1</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

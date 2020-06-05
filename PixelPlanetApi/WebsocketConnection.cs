@@ -51,24 +51,6 @@ namespace PixelPlanetApi
                 RegisterChunk(chunk);
         }
 
-        public void RegisterChunks(HashSet<(byte, byte)> chunks)
-        {
-            chunks.ExceptWith(_trackedChunks);
-            _trackedChunks.UnionWith(chunks);
-
-            foreach (var chunk in chunks)
-                RegisterChunk(chunk);
-        }
-
-        public void DeRegisterChunks(HashSet<(byte, byte)> chunks)
-        {
-            chunks.IntersectWith(_trackedChunks);
-            _trackedChunks.ExceptWith(chunks);
-
-            foreach (var chunk in chunks)
-                DeRegisterChunk(chunk);
-        }
-
         public void PlacePixel(byte cx, byte cy, int offset, byte color)
         {
             _websocketResetEvent.Wait();

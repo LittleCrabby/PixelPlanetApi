@@ -3,11 +3,10 @@ using Newtonsoft.Json;
 
 namespace PixelPlanetApi.Models
 {
-#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
     public class MeResponse
     {
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         [JsonProperty("dailyRanking")]
         public int DailyRanking { get; set; }
@@ -22,6 +21,6 @@ namespace PixelPlanetApi.Models
         public int TotalPixels { get; set; }
 
         [JsonProperty("canvases")]
-        public Dictionary<byte, CanvasResponse> Canvases { get; set; }
+        public IDictionary<byte, CanvasResponse> Canvases { get; set; } = new Dictionary<byte, CanvasResponse>();
     }
 }

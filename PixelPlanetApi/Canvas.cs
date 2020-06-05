@@ -5,26 +5,82 @@ using PixelPlanetApi.Models;
 
 namespace PixelPlanetApi
 {
+    /// <summary>
+    /// Canvas values and helper methods
+    /// </summary>
     public class Canvas
     {
+        /// <summary>
+        /// Gets the canvas identifier, which is just the index number.
+        /// </summary>
+        /// <value>
+        /// The identifier.
+        /// </value>
         public byte Id { get; }
+
+        /// <summary>
+        /// Gets the base cooldown for clean pixels.
+        /// </summary>
+        /// <value>
+        /// The base cooldown.
+        /// </value>
         public int BaseCooldown { get; }
+
+        /// <summary>
+        /// Gets the cooldown when replacing existing pixel.
+        /// </summary>
+        /// <value>
+        /// The placed cooldown.
+        /// </value>
         public int PlacedCooldown { get; }
+
+        /// <summary>
+        /// Gets the wait time after cooldown limit reached.
+        /// </summary>
+        /// <value>
+        /// The wait time.
+        /// </value>
         public int WaitTime { get; }
+
+        /// <summary>
+        /// Gets the size of the canvas.
+        /// </summary>
+        /// <value>
+        /// The size of the canvas.
+        /// </value>
         public int CanvasSize { get; }
         public int ChunkSize { get; }
+        /// <summary>
+        /// Gets the number of pixels placed required for this <see cref="Canvas"/>.
+        /// </summary>
+        /// <value>
+        /// The requirement.
+        /// </value>
         public int Requirement { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="Canvas"/> is 3d.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if is 3d
+        /// </value>
         public bool Is3d { get; }
 
-        private (byte, byte, byte)[] _palette = Array.Empty<(byte, byte, byte)>();
+        private (byte r, byte g, byte b)[] _palette = Array.Empty<(byte r, byte g, byte b)>();
 
-        public (byte, byte, byte)[] Palette
+        /// <summary>
+        /// Gets the canvas colors array. Each color is a tuple in format (r, g, b)
+        /// </summary>
+        /// <value>
+        /// The palette.
+        /// </value>
+        public (byte r, byte g, byte b)[] Palette
         {
-            get => ((byte, byte, byte)[])_palette.Clone();
+            get => ((byte r, byte g, byte b)[])_palette.Clone();
             private set => _palette = value;
         }
 
-        public Canvas(KeyValuePair<byte, CanvasResponse> canvas)
+        internal Canvas(KeyValuePair<byte, CanvasResponse> canvas)
         {
             Id = canvas.Key;
             BaseCooldown = canvas.Value.BaseCooldown;
@@ -38,6 +94,14 @@ namespace PixelPlanetApi
             Palette = canvas.Value.Colors.Select(x => (x[0], x[1], x[2])).ToArray();
         }
 
+        /// <summary>
+        /// Gets the chunk of pixel.
+        /// </summary>
+        /// <param name="x">X.</param>
+        /// <param name="y">Y.</param>
+        /// <param name="z">Z - only for 3D canvas.</param>
+        /// <returns>Chunk coordinates tuple.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Coordinates are out of canvas bounds</exception>
         public (byte, byte) GetChunkOfPixel(int x, int y, int? z = default)
         {
             var halfSize = CanvasSize / 2;
@@ -54,6 +118,14 @@ namespace PixelPlanetApi
             return (cx, cy);
         }
 
+        /// <summary>
+        /// Gets the offset of pixel. Offset is the count of pixels from the start of chunk.
+        /// </summary>
+        /// <param name="x">X.</param>
+        /// <param name="y">Y.</param>
+        /// <param name="z">Z - only for 3D canvas.</param>
+        /// <returns>Pixels offset.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Coordinates are out of canvas bounds</exception>
         public int GetOffsetOfPixel(int x, int y, int? z = default)
         {
             var halfSize = CanvasSize / 2;
@@ -72,11 +144,22 @@ namespace PixelPlanetApi
             return (ry * ChunkSize) + rx;
         }
 
+        /// <summary>
+        /// Gets the absolute coordinate.
+        /// </summary>
+        /// <param name="c">Canvas coordinate.</param>
+        /// <param name="r">Relative to the canvas coordinate.</param>
+        /// <returns>Absolute coordinate</returns>
         public short GetAbsoluteCoordinate(byte c, byte r)
         {
             return (short)(r + c * ChunkSize - CanvasSize / 2);
         }
 
+        /// <summary>
+        /// Gets the chunks for <see cref="Area"/>.
+        /// </summary>
+        /// <param name="area">The <see cref="Area"/>.</param>
+        /// <returns>Chunks coordinates HashSet</returns>
         public HashSet<(byte, byte)> GetChunksForArea(Area area)
         {
             var chunks = new HashSet<(byte, byte)>();

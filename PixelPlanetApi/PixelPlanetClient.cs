@@ -11,6 +11,9 @@ using PixelPlanetApi.Models;
 
 namespace PixelPlanetApi
 {
+    /// <summary>
+    /// Provides a convinient access to pixelplanet API
+    /// </summary>
     public class PixelPlanetClient : IDisposable
     {
         private const string BaseDomain = "pixelplanet.fun";
@@ -21,10 +24,27 @@ namespace PixelPlanetApi
         private readonly HttpClient _client;
         private readonly Dictionary<byte, WebsocketConnection> _connections = new Dictionary<byte, WebsocketConnection>();
 
+        /// <summary>
+        /// Gets available canvases.
+        /// </summary>
+        /// <value>
+        /// The canvases.
+        /// </value>
+        /// <seealso cref="Canvas"/>
         public Dictionary<byte, Canvas> Canvases { get; private set; } = new Dictionary<byte, Canvas>();
 
+        /// <summary>
+        /// Occurs when pixel change message received.
+        /// </summary>
         public event EventHandler<PixelChangeEventArgs>? PixelChangeEvent;
 
+        /// <summary>
+        /// Creates new <see cref="PixelPlanetClient"/> instance.
+        /// </summary>
+        /// <param name="handlerFactory">
+        /// Pass handler factory to modify <see cref="HttpClientHandler"/> object and set cookies, proxies etc.
+        /// </param>
+        /// <returns><see cref="PixelPlanetClient"/> instance</returns>
         public static async Task<PixelPlanetClient> Create(Action<HttpClientHandler>? handlerFactory = null)
         {
             var client = new PixelPlanetClient(handlerFactory);
@@ -43,6 +63,12 @@ namespace PixelPlanetApi
             _client = new HttpClient(_handler);
         }
 
+        /// <summary>
+        /// Places the pixel.
+        /// </summary>
+        /// <param name="canvasId">The canvas identifier.</param>
+        /// <param name="pixel">The <see cref="Pixel"/> object.</param>
+        /// <returns></returns>
         public async Task<PixelReturn> PlacePixel(byte canvasId, Pixel pixel)
         {
             var (canvas, connection) = GetCanvasConnection(canvasId);
@@ -70,6 +96,10 @@ namespace PixelPlanetApi
             return await tcs.Task.ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Sets collection of <see cref="Area"/> to be tracked for pixel changes.
+        /// </summary>
+        /// <param name="areas">The <see cref="Area"/> collection.</param>
         public void TrackMultipleAreas(IEnumerable<Area> areas)
         {
             var groups = areas.GroupBy(a => a.CanvasId);
@@ -88,23 +118,38 @@ namespace PixelPlanetApi
             }
         }
 
+        /// <summary>
+        /// Sets client to track changes for single area.
+        /// </summary>
+        /// <param name="area">The area.</param>
         public void TrackArea(Area area)
         {
             var (canvas, connection) = GetCanvasConnection(area.CanvasId);
             var chunks = canvas.GetChunksForArea(area);
 
-            connection.RegisterChunks(chunks);
+            connection.SetTrackedChunks(chunks);
         }
 
         #region HTTP methods
 
-        public async Task<byte[]> GetChunk(byte c1, byte c2, byte canvas)
+        /// <summary>
+        /// Gets the chunk.
+        /// </summary>
+        /// <param name="cx">Chunk X coordinate.</param>
+        /// <param name="cy">Chunk Y coordinate.</param>
+        /// <param name="canvasId">Canvas identifier.</param>
+        /// <returns>Chunk data byte array.</returns>
+        public async Task<byte[]> GetChunk(byte cx, byte cy, byte canvasId)
         {
-            var url = $"https://{BaseDomain}/chunks/{canvas}/{c1}/{c2}.bmp";
+            var url = $"https://{BaseDomain}/chunks/{canvasId}/{cx}/{cy}.bmp";
 
             return await _client.GetByteArrayAsync(url).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Updates the captcha token.
+        /// </summary>
+        /// <param name="token">The token.</param>
         public async Task UpdateCaptchaToken(string token)
         {
             var captchaUpdate = new CaptchaUpdate { Token = token };
@@ -113,6 +158,10 @@ namespace PixelPlanetApi
             await _client.PostAsync($"{ApiUrl}/captcha", content).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Fetches user stats and canvases information.
+        /// </summary>
+        /// <returns>Me response model form pixelplanet</returns>
         public async Task<MeResponse> FetchMe()
         {
             var responseString = await _client.GetStringAsync($"{ApiUrl}/me").ConfigureAwait(false);
