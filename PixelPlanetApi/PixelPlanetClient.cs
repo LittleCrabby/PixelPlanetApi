@@ -139,11 +139,64 @@ namespace PixelPlanetApi
         /// <param name="cy">Chunk Y coordinate.</param>
         /// <param name="canvasId">Canvas identifier.</param>
         /// <returns>Chunk data byte array.</returns>
-        public async Task<byte[]> GetChunk(byte cx, byte cy, byte canvasId)
+        public async Task<byte[]> GetChunkData(byte cx, byte cy, byte canvasId)
         {
             var url = $"https://{BaseDomain}/chunks/{canvasId}/{cx}/{cy}.bmp";
 
             return await _client.GetByteArrayAsync(url).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Gets data for drawing area.
+        /// </summary>
+        /// <param name="area"><see cref="Area"/></param>
+        /// <returns>TuplArea data byte array.</returns>
+        public async Task<byte[]> GetAreaData(Area area)
+        {
+            var canvas = Canvases[area.CanvasId];
+            var dataSize = (area.X2 - area.X1 + 1) * (area.Y2 - area.Y1 + 1);
+            var data = new byte[dataSize];
+
+            var (cx1, cy1) = canvas.GetChunkOfPixel(area.X1, area.Y1);
+            var (cx2, cy2) = canvas.GetChunkOfPixel(area.X2, area.Y2);
+            var height = (byte)(cy2 - cy1 + 1);
+            var width = (byte)(cx2 - cx1 + 1);
+            var dataOffset = 0;
+
+            for (byte cy = 0; cy < height; cy++)
+            {
+                var chunkDataArray = new byte[width][];
+
+                for (byte cx = 0; cx < width; cx++)
+                {
+                    chunkDataArray[cx] = await GetChunkData((byte)(cx1 + cx), (byte)(cy1 + cy), area.CanvasId).ConfigureAwait(false);
+                }
+
+                var chunkY1 = canvas.GetAbsoluteCoordinate((byte)(cy1 + cy), 0);
+                var chunkY2 = chunkY1 + canvas.ChunkSize - 1;
+                var startY = area.Y1 > chunkY1 ? area.Y1 - chunkY1 : 0;
+                var endY = area.Y2 < chunkY2 ? area.Y2 - chunkY1 : chunkY2 - chunkY1;
+
+                for (var y = startY; y <= endY; y++)
+                {
+                    for (var cx = 0; cx < width; cx++)
+                    {
+                        var chunkX1 = canvas.GetAbsoluteCoordinate((byte)(cx1 + cx), 0);
+                        var chunkX2 = chunkX1 + canvas.ChunkSize - 1;
+                        var startX = area.X1 > chunkX1 ? area.X1 - chunkX1 : 0;
+                        var endX = area.X2 < chunkX2 ? area.X2 - chunkX1 : chunkX2 - chunkX1;
+
+                        for (var x = startX; x <= endX; x++, dataOffset++)
+                        {
+                            var chunkOffset = x + y * canvas.ChunkSize;
+                            data[dataOffset] = chunkDataArray[cx][chunkOffset];
+                        }
+                    }
+                }
+            }
+
+
+            return data;
         }
 
         /// <summary>
