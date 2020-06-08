@@ -19,6 +19,14 @@ namespace PixelPlanetApi
         public byte Id { get; }
 
         /// <summary>
+        /// Gets the canvas name.
+        /// </summary>
+        /// <value>
+        /// Canvas name.
+        /// </value>
+        public string Name { get; }
+
+        /// <summary>
         /// Gets the base cooldown for clean pixels.
         /// </summary>
         /// <value>
@@ -49,7 +57,15 @@ namespace PixelPlanetApi
         /// The size of the canvas.
         /// </value>
         public int CanvasSize { get; }
+
+        /// <summary>
+        /// Gets the dimension of the single chunk.
+        /// </summary>
+        /// <value>
+        /// The size of chunk.
+        /// </value>
         public int ChunkSize { get; }
+
         /// <summary>
         /// Gets the number of pixels placed required for this <see cref="Canvas"/>.
         /// </summary>
@@ -66,7 +82,7 @@ namespace PixelPlanetApi
         /// </value>
         public bool Is3d { get; }
 
-        private (byte r, byte g, byte b)[] _palette = Array.Empty<(byte r, byte g, byte b)>();
+        private Color[] _palette = Array.Empty<Color>();
 
         /// <summary>
         /// Gets the canvas colors array. Each color is a tuple in format (r, g, b)
@@ -74,15 +90,16 @@ namespace PixelPlanetApi
         /// <value>
         /// The palette.
         /// </value>
-        public (byte r, byte g, byte b)[] Palette
+        public Color[] Palette
         {
-            get => ((byte r, byte g, byte b)[])_palette.Clone();
+            get => (Color[])_palette.Clone();
             private set => _palette = value;
         }
 
         internal Canvas(KeyValuePair<byte, CanvasResponse> canvas)
         {
             Id = canvas.Key;
+            Name = canvas.Value.Title;
             BaseCooldown = canvas.Value.BaseCooldown;
             PlacedCooldown = canvas.Value.PlacedCooldown;
             WaitTime = canvas.Value.WaitTime;
@@ -91,7 +108,7 @@ namespace PixelPlanetApi
             Requirement = canvas.Value.Requirement;
             Is3d = canvas.Value.Is3d;
 
-            Palette = canvas.Value.Colors.Select(x => (x[0], x[1], x[2])).ToArray();
+            Palette = canvas.Value.Colors.Select(x => new Color(x[0], x[1], x[2])).ToArray();
         }
 
         /// <summary>
