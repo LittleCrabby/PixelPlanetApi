@@ -81,4 +81,14 @@ Install-Package PixelPlanetApi
     MeResponse me = await _client.FetchMe();
     ```
 
+* Pay attention to `Canvas` type. It has a lot of useful methods to work with canvas data.
+
+    ``` C#
+    Canvas canvas = _client.Canvases[0]; // Earth canvas
+    (byte cx, byte cy) = canvas.GetChunkOfPixel(1000, 1500); // Chunk coordinates for the pixel
+    int offset = GetOffsetOfPixel(2222, 800); // Offset is the count of pixels from the start of chunk.
+    short x = GetAbsoluteCoordinate(10, 200);
+    HashSet<(byte, byte)> areaChunks = canvas.GetChunksForArea(area);
+    ```
+
 * See other PixelPlanetClient public methods. I will try to make more convenient documentation soon
