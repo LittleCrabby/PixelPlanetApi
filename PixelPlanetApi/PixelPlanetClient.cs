@@ -50,7 +50,7 @@ namespace PixelPlanetApi
             var client = new PixelPlanetClient(handlerFactory);
             var me = await client.FetchMe().ConfigureAwait(false);
 
-            client.Canvases = me.Canvases.Select(c => new Canvas(c)).ToDictionary(c => c.Id);
+            client.Canvases = me.Canvases.Select(c => new Canvas(c)).ToDictionary(c => c.Index);
 
             return client;
         }
@@ -254,7 +254,7 @@ namespace PixelPlanetApi
 
         private void OnPixelChange(object sender, PixelChangeRelativeEventArgs pixelChangeRelative)
         {
-            var canvas = Canvases[pixelChangeRelative.CanvasId];
+            var canvas = Canvases[pixelChangeRelative.Canvas];
             var pixel = new Pixel { Color = pixelChangeRelative.Color };
 
             if (pixelChangeRelative.RZ == null)
@@ -269,7 +269,7 @@ namespace PixelPlanetApi
 
             PixelChangeEvent?.Invoke(this, new PixelChangeEventArgs
             {
-                CanvasId = pixelChangeRelative.CanvasId,
+                CanvasId = pixelChangeRelative.Canvas,
                 Pixel = pixel
             });
         }

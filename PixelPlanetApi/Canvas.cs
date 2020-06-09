@@ -11,12 +11,20 @@ namespace PixelPlanetApi
     public class Canvas
     {
         /// <summary>
-        /// Gets the canvas identifier, which is just the index number.
+        /// Gets the canvas index.
+        /// </summary>
+        /// <value>
+        /// The index.
+        /// </value>
+        public byte Index { get; }
+
+        /// <summary>
+        /// Gets the canvas identifier.
         /// </summary>
         /// <value>
         /// The identifier.
         /// </value>
-        public byte Id { get; }
+        public char Identifier { get; }
 
         /// <summary>
         /// Gets the canvas name.
@@ -98,7 +106,8 @@ namespace PixelPlanetApi
 
         internal Canvas(KeyValuePair<byte, CanvasResponse> canvas)
         {
-            Id = canvas.Key;
+            Index = canvas.Key;
+            Identifier = canvas.Value.Identifier;
             Name = canvas.Value.Title;
             BaseCooldown = canvas.Value.BaseCooldown;
             PlacedCooldown = canvas.Value.PlacedCooldown;

@@ -10,6 +10,6 @@ namespace PixelPlanetApi.Eventing
         public byte RY { get; set; }
         public byte RX { get; set; }
         public byte Color { get; set; }
-        public byte CanvasId { get; set; }
+        public byte Canvas { get; set; }
     }
 }

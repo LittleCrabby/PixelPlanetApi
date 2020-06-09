@@ -6,7 +6,7 @@ namespace PixelPlanetApi.Models
     public class CanvasResponse
     {
         [JsonProperty("ident")]
-        public string Identifier { get; set; }
+        public char Identifier { get; set; }
 
         [JsonProperty("title")]
         public string Title { get; set; }

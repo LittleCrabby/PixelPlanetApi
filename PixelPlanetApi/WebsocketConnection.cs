@@ -13,13 +13,16 @@ namespace PixelPlanetApi
         private readonly HashSet<(byte, byte)> _trackedChunks = new HashSet<(byte, byte)>();
         private readonly ManualResetEventSlim _websocketResetEvent = new ManualResetEventSlim(false);
         private readonly WebsocketClient _client;
+        private readonly byte _canvasIndex;
 
         public event EventHandler<PixelChangeRelativeEventArgs>? PixelChangedEvent;
 
         public event EventHandler<PixelRetrunEventArgs>? PixelReturnedEvent;
 
-        public WebsocketConnection(Uri url, byte canvas, Func<ClientWebSocket>? clientFactory = null)
+        public WebsocketConnection(Uri url, byte canvasIndex, Func<ClientWebSocket>? clientFactory = null)
         {
+            _canvasIndex = canvasIndex;
+
             _client = new WebsocketClient(url, clientFactory)
             {
                 IsTextMessageConversionEnabled = false,
@@ -28,7 +31,7 @@ namespace PixelPlanetApi
 
             _client.ReconnectionHappened.Subscribe((i) =>
             {
-                byte[] data = new byte[2] { (byte)Opcode.RegisterCanvas, canvas };
+                byte[] data = new byte[2] { (byte)Opcode.RegisterCanvas, _canvasIndex };
                 _client.Send(data);
                 _websocketResetEvent.Set();
             });
@@ -116,7 +119,8 @@ namespace PixelPlanetApi
                         RZ = data[3],
                         RY = data[4],
                         RX = data[5],
-                        Color = data[6]
+                        Color = data[6],
+                        Canvas = _canvasIndex
                     });
                     break;
 
